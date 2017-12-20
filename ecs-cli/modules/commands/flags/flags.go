@@ -101,8 +101,9 @@ const (
 	ContainerNameFlag                       = "container-name"
 	ContainerPortFlag                       = "container-port"
 	LoadBalancerNameFlag                    = "load-balancer-name"
-	RoleFlag                                = "role"
-	ComposeServiceTimeOutFlag               = "timeout"
+	//HealthCheckGracePeriodFlag              = "health-check-grace-period"
+	RoleFlag                  = "role"
+	ComposeServiceTimeOutFlag = "timeout"
 )
 
 // OptionalRegionAndProfileFlags provides these flags:

@@ -244,8 +244,9 @@ func (s *Service) Up() error {
 	if err != nil {
 		return err
 	}
+	fmt.Println(s.Context())
 
-	err = s.Context().ECSClient.UpdateService(ecsServiceName, newTaskDefinitionId, newCount, deploymentConfig, networkConfig)
+	err = s.Context().ECSClient.UpdateService(ecsServiceName, newTaskDefinitionId, newCount, deploymentConfig, networkConfig, nil)
 	if err != nil {
 		return err
 	}
@@ -343,7 +344,7 @@ func (s *Service) createService() error {
 		return err
 	}
 
-	err = s.Context().ECSClient.CreateService(serviceName, taskDefinitionID, s.loadBalancer, s.role, s.DeploymentConfig(), networkConfig, launchType)
+	err = s.Context().ECSClient.CreateService(serviceName, taskDefinitionID, s.loadBalancer, s.role, s.DeploymentConfig(), networkConfig, launchType, 0)
 	if err != nil {
 		return err
 	}

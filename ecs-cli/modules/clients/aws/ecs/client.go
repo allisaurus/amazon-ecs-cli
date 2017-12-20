@@ -44,9 +44,9 @@ type ECSClient interface {
 	IsActiveCluster(clusterName string) (bool, error)
 
 	// Service related
-	CreateService(serviceName, taskDefName string, loadBalancer *ecs.LoadBalancer, role string, deploymentConfig *ecs.DeploymentConfiguration, networkConfig *ecs.NetworkConfiguration, launchType string) error
+	CreateService(serviceName, taskDefName string, loadBalancer *ecs.LoadBalancer, role string, deploymentConfig *ecs.DeploymentConfiguration, networkConfig *ecs.NetworkConfiguration, launchType string) error // to add: healthCheckGracePeriod int64
 	UpdateServiceCount(serviceName string, count int64, deploymentConfig *ecs.DeploymentConfiguration, networkConfig *ecs.NetworkConfiguration) error
-	UpdateService(serviceName, taskDefinitionName string, count int64, deploymentConfig *ecs.DeploymentConfiguration, networkConfig *ecs.NetworkConfiguration) error
+	UpdateService(serviceName, taskDefinitionName string, count int64, deploymentConfig *ecs.DeploymentConfiguration, networkConfig *ecs.NetworkConfiguration, healthCheckGracePeriod *int64) error
 	DescribeService(serviceName string) (*ecs.DescribeServicesOutput, error)
 	DeleteService(serviceName string) error
 
@@ -132,6 +132,7 @@ func (c *ecsClient) DeleteService(serviceName string) error {
 	return nil
 }
 
+//healthCheckGracePeriod int64 - hardcoded for testing
 func (c *ecsClient) CreateService(serviceName, taskDefName string, loadBalancer *ecs.LoadBalancer, role string, deploymentConfig *ecs.DeploymentConfiguration, networkConfig *ecs.NetworkConfiguration, launchType string) error {
 	createServiceInput := &ecs.CreateServiceInput{
 		DesiredCount:            aws.Int64(0),            // Required
@@ -141,6 +142,7 @@ func (c *ecsClient) CreateService(serviceName, taskDefName string, loadBalancer 
 		DeploymentConfiguration: deploymentConfig,
 		LoadBalancers:           []*ecs.LoadBalancer{loadBalancer},
 		Role:                    aws.String(role),
+		HealthCheckGracePeriodSeconds: aws.Int64(5),
 	}
 
 	if networkConfig != nil {
@@ -175,15 +177,19 @@ func (c *ecsClient) CreateService(serviceName, taskDefName string, loadBalancer 
 }
 
 func (c *ecsClient) UpdateServiceCount(serviceName string, count int64, deploymentConfig *ecs.DeploymentConfiguration, networkConfig *ecs.NetworkConfiguration) error {
-	return c.UpdateService(serviceName, "", count, deploymentConfig, networkConfig)
+	return c.UpdateService(serviceName, "", count, deploymentConfig, networkConfig, nil)
 }
 
-func (c *ecsClient) UpdateService(serviceName, taskDefinition string, count int64, deploymentConfig *ecs.DeploymentConfiguration, networkConfig *ecs.NetworkConfiguration) error {
+func (c *ecsClient) UpdateService(serviceName, taskDefinition string, count int64, deploymentConfig *ecs.DeploymentConfiguration, networkConfig *ecs.NetworkConfiguration, healthCheckGracePeriod *int64) error {
 	input := &ecs.UpdateServiceInput{
 		DesiredCount:            aws.Int64(count),
 		Service:                 aws.String(serviceName),
 		Cluster:                 aws.String(c.params.Cluster),
 		DeploymentConfiguration: deploymentConfig,
+	}
+
+	if healthCheckGracePeriod != nil {
+		input.HealthCheckGracePeriodSeconds = aws.Int64(*healthCheckGracePeriod)
 	}
 
 	if networkConfig != nil {
@@ -399,10 +405,10 @@ func (c *ecsClient) DescribeTasks(taskArns []*string) ([]*ecs.Task, error) {
 // RunTask issues a run task request for the input task definition
 func (c *ecsClient) RunTask(taskDefinition, group string, count int, networkConfig *ecs.NetworkConfiguration, launchType string) (*ecs.RunTaskOutput, error) {
 	runTaskInput := &ecs.RunTaskInput{
-		Cluster:              aws.String(c.params.Cluster),
-		TaskDefinition:       aws.String(taskDefinition),
-		Group:                aws.String(group),
-		Count:                aws.Int64(int64(count)),
+		Cluster:        aws.String(c.params.Cluster),
+		TaskDefinition: aws.String(taskDefinition),
+		Group:          aws.String(group),
+		Count:          aws.Int64(int64(count)),
 	}
 
 	if networkConfig != nil {

@@ -135,16 +135,16 @@ func ecsParamsWithFargateNetworkConfig() *utils.ECSParams {
 	return &utils.ECSParams{
 		TaskDefinition: utils.EcsTaskDef{
 			ExecutionRole: "arn:aws:iam::123456789012:role/fargate_role",
-			NetworkMode: "awsvpc",
+			NetworkMode:   "awsvpc",
 			TaskSize: utils.TaskSize{
-				Cpu: "512",
+				Cpu:    "512",
 				Memory: "1GB",
 			},
 		},
 		RunParams: utils.RunParams{
 			NetworkConfiguration: utils.NetworkConfiguration{
 				AwsVpcConfiguration: utils.AwsVpcConfiguration{
-					Subnets: []string{"sg-bafff1ed", "sg-c0ffeefe"},
+					Subnets:        []string{"sg-bafff1ed", "sg-c0ffeefe"},
 					AssignPublicIp: utils.Enabled,
 				},
 			},
@@ -336,6 +336,7 @@ type validateLoadBalancer func(*ecs.LoadBalancer, string)
 type validateLaunchType func(string)
 type validateNetworkConfig func(*ecs.NetworkConfiguration)
 
+// add HCGP validation
 func createServiceTest(t *testing.T,
 	cliContext *cli.Context,
 	cliParams *config.CLIParams,
