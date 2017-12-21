@@ -42,6 +42,7 @@ type Service struct {
 	deploymentConfig *ecs.DeploymentConfiguration
 	loadBalancer     *ecs.LoadBalancer
 	role             string
+	healthCheckGP    *int64
 }
 
 const (
@@ -77,6 +78,10 @@ func (s *Service) LoadContext() error {
 	role := s.Context().CLIContext.String(flags.RoleFlag)
 	targetGroupArn := s.Context().CLIContext.String(flags.TargetGroupArnFlag)
 	loadBalancerName := s.Context().CLIContext.String(flags.LoadBalancerNameFlag)
+	healthCheckGP, err := getInt64FromCLIContext(s.Context(), flags.HealthCheckGracePeriodFlag)
+	if err != nil {
+		return err
+	}
 	containerName := s.Context().CLIContext.String(flags.ContainerNameFlag)
 	containerPort, err := getInt64FromCLIContext(s.Context(), flags.ContainerPortFlag)
 	if err != nil {
@@ -101,6 +106,8 @@ func (s *Service) LoadContext() error {
 			s.loadBalancer.LoadBalancerName = aws.String(loadBalancerName)
 		}
 		s.role = role
+		s.healthCheckGP = healthCheckGP
+		log.Printf("HCGP context: %v", s.healthCheckGP)
 	}
 	return nil
 }
@@ -186,7 +193,7 @@ func (s *Service) Start() error {
 // It does so by calling DescribeService to see if its present, else's calls Create() and Start()
 // If the compose file had changed, it would update the service with the new task definition
 // by calling UpdateService with the new task definition
-func (s *Service) Up() error {
+func (s *Service) Up() error { // update
 	// describe service to get the task definition and count running
 	ecsService, err := s.describeService()
 	var missingServiceErr bool
@@ -197,6 +204,7 @@ func (s *Service) Up() error {
 			return err
 		}
 	}
+	log.Warn("described HCGP: %v", ecsService.HealthCheckGracePeriodSeconds)
 
 	// get the current snapshot of compose yml
 	// and update this instance with the latest task definition
@@ -244,9 +252,9 @@ func (s *Service) Up() error {
 	if err != nil {
 		return err
 	}
-	fmt.Println(s.Context())
+	log.Warn("UP service context: %+v", s.Context())
 
-	err = s.Context().ECSClient.UpdateService(ecsServiceName, newTaskDefinitionId, newCount, deploymentConfig, networkConfig, nil)
+	err = s.Context().ECSClient.UpdateService(ecsServiceName, newTaskDefinitionId, newCount, deploymentConfig, networkConfig, s.healthCheckGP)
 	if err != nil {
 		return err
 	}
@@ -335,6 +343,8 @@ func (s *Service) createService() error {
 	serviceName := entity.GetServiceName(s)
 	taskDefinitionID := entity.GetIdFromArn(s.TaskDefinition().TaskDefinitionArn)
 	launchType := s.Context().CLIParams.LaunchType
+
+	log.Warn("CREATE service context: %+v", s.Context())
 
 	networkConfig, err := composeutils.ConvertToECSNetworkConfiguration(s.projectContext.ECSParams)
 	if err != nil {

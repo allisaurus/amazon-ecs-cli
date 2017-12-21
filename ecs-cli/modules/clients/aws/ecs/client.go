@@ -142,7 +142,7 @@ func (c *ecsClient) CreateService(serviceName, taskDefName string, loadBalancer 
 		DeploymentConfiguration: deploymentConfig,
 		LoadBalancers:           []*ecs.LoadBalancer{loadBalancer},
 		Role:                    aws.String(role),
-		HealthCheckGracePeriodSeconds: aws.Int64(5),
+		//HealthCheckGracePeriodSeconds: aws.Int64(5),
 	}
 
 	if networkConfig != nil {
@@ -229,6 +229,7 @@ func (c *ecsClient) DescribeService(serviceName string) (*ecs.DescribeServicesOu
 		Services: []*string{aws.String(serviceName)},
 		Cluster:  aws.String(c.params.Cluster),
 	})
+	log.Warn("describing: %v", serviceName)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"service": serviceName,
