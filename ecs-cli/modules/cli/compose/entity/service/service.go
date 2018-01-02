@@ -403,7 +403,7 @@ func (s *Service) updateService(count int64) error {
 		return err
 	}
 
-	if err = s.Context().ECSClient.UpdateServiceCount(serviceName, count, deploymentConfig, networkConfig); err != nil {
+	if err = s.Context().ECSClient.UpdateServiceCount(serviceName, count, deploymentConfig, networkConfig, s.healthCheckGP); err != nil {
 		return err
 	}
 
