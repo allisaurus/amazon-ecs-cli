@@ -107,7 +107,7 @@ func (s *Service) LoadContext() error {
 		}
 		s.role = role
 		s.healthCheckGP = healthCheckGP
-		log.Printf("HCGP context: %v", s.healthCheckGP)
+		log.Printf("HCGP context: %v", *healthCheckGP)
 	}
 	return nil
 }
@@ -204,7 +204,6 @@ func (s *Service) Up() error { // update
 			return err
 		}
 	}
-	log.Warn("described HCGP: %v", ecsService.HealthCheckGracePeriodSeconds)
 
 	// get the current snapshot of compose yml
 	// and update this instance with the latest task definition
@@ -252,7 +251,7 @@ func (s *Service) Up() error { // update
 	if err != nil {
 		return err
 	}
-	log.Warn("UP service context: %+v", s.Context())
+	log.Printf("describe context: %v", *ecsService.HealthCheckGracePeriodSeconds)
 
 	err = s.Context().ECSClient.UpdateService(ecsServiceName, newTaskDefinitionId, newCount, deploymentConfig, networkConfig, s.healthCheckGP)
 	if err != nil {
@@ -354,7 +353,7 @@ func (s *Service) createService() error {
 		return err
 	}
 
-	err = s.Context().ECSClient.CreateService(serviceName, taskDefinitionID, s.loadBalancer, s.role, s.DeploymentConfig(), networkConfig, launchType)
+	err = s.Context().ECSClient.CreateService(serviceName, taskDefinitionID, s.loadBalancer, s.role, s.DeploymentConfig(), networkConfig, launchType, s.healthCheckGP)
 	if err != nil {
 		return err
 	}
@@ -417,6 +416,9 @@ func (s *Service) updateService(count int64) error {
 	}
 	if deploymentConfig != nil && deploymentConfig.MinimumHealthyPercent != nil {
 		fields["deployment-min-healthy-percent"] = aws.Int64Value(deploymentConfig.MinimumHealthyPercent)
+	}
+	if s.healthCheckGP != nil {
+		fields["health-check-grace-period"] = *s.healthCheckGP
 	}
 
 	log.WithFields(fields).Info("Updated ECS service successfully")
