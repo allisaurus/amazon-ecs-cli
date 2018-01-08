@@ -181,7 +181,7 @@ func loadBalancerFlags() []cli.Flag {
 			Name:  flags.RoleFlag,
 			Usage: roleUsageString,
 		},
-		cli.IntFlag{
+		cli.StringFlag{
 			Name:  flags.HealthCheckGracePeriodFlag,
 			Usage: healthCheckGracePeriodString,
 		},

@@ -132,7 +132,6 @@ func (c *ecsClient) DeleteService(serviceName string) error {
 	return nil
 }
 
-//healthCheckGracePeriod int64 - hardcoded for testing
 func (c *ecsClient) CreateService(serviceName, taskDefName string, loadBalancer *ecs.LoadBalancer, role string, deploymentConfig *ecs.DeploymentConfiguration, networkConfig *ecs.NetworkConfiguration, launchType string, healthCheckGracePeriod *int64) error {
 	createServiceInput := &ecs.CreateServiceInput{
 		DesiredCount:            aws.Int64(0),            // Required
@@ -146,7 +145,6 @@ func (c *ecsClient) CreateService(serviceName, taskDefName string, loadBalancer 
 
 	if healthCheckGracePeriod != nil {
 		createServiceInput.HealthCheckGracePeriodSeconds = aws.Int64(*healthCheckGracePeriod)
-		log.Printf("CREATE hcgp set: %v", createServiceInput.HealthCheckGracePeriodSeconds)
 	}
 
 	if networkConfig != nil {
@@ -188,7 +186,6 @@ func (c *ecsClient) UpdateServiceCount(serviceName string, count int64, deployme
 }
 
 func (c *ecsClient) UpdateService(serviceName, taskDefinition string, count int64, deploymentConfig *ecs.DeploymentConfiguration, networkConfig *ecs.NetworkConfiguration, healthCheckGracePeriod *int64) error {
-	log.Printf("UPDATE-SERVICE hcgp: %v", healthCheckGracePeriod)
 	input := &ecs.UpdateServiceInput{
 		DesiredCount:            aws.Int64(count),
 		Service:                 aws.String(serviceName),
@@ -237,7 +234,6 @@ func (c *ecsClient) DescribeService(serviceName string) (*ecs.DescribeServicesOu
 		Services: []*string{aws.String(serviceName)},
 		Cluster:  aws.String(c.params.Cluster),
 	})
-	log.Warn("describing: %v", serviceName)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"service": serviceName,

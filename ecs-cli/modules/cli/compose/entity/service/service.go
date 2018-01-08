@@ -78,15 +78,18 @@ func (s *Service) LoadContext() error {
 	role := s.Context().CLIContext.String(flags.RoleFlag)
 	targetGroupArn := s.Context().CLIContext.String(flags.TargetGroupArnFlag)
 	loadBalancerName := s.Context().CLIContext.String(flags.LoadBalancerNameFlag)
-	healthCheckGP, err := getInt64FromCLIContext(s.Context(), flags.HealthCheckGracePeriodFlag)
-	if err != nil {
-		return err
-	}
 	containerName := s.Context().CLIContext.String(flags.ContainerNameFlag)
 	containerPort, err := getInt64FromCLIContext(s.Context(), flags.ContainerPortFlag)
 	if err != nil {
 		return err
 	}
+
+	// Health Check Grace Period
+	healthCheckGP, err := getInt64FromCLIContext(s.Context(), flags.HealthCheckGracePeriodFlag)
+	if err != nil {
+		return err
+	}
+	s.healthCheckGP = healthCheckGP
 
 	// Validates LoadBalancerName and TargetGroupArn cannot exist at the same time
 	// The rest will be taken care off by the API call
@@ -106,8 +109,6 @@ func (s *Service) LoadContext() error {
 			s.loadBalancer.LoadBalancerName = aws.String(loadBalancerName)
 		}
 		s.role = role
-		s.healthCheckGP = healthCheckGP
-		log.Printf("HCGP context: %v", *healthCheckGP)
 	}
 	return nil
 }
@@ -238,9 +239,9 @@ func (s *Service) Up() error { // update
 		newCount = oldCount // get the current non-zero count
 	}
 
-	// if both the task definitions are the same, just start the service
+	// if both the task definitions are the same, call update with the new count
 	if oldTaskDefinitionId == newTaskDefinitionId {
-		return s.startService(ecsService)
+		return s.updateService(newCount)
 	}
 
 	deploymentConfig := s.DeploymentConfig()
@@ -251,7 +252,6 @@ func (s *Service) Up() error { // update
 	if err != nil {
 		return err
 	}
-	log.Printf("describe context: %v", *ecsService.HealthCheckGracePeriodSeconds)
 
 	err = s.Context().ECSClient.UpdateService(ecsServiceName, newTaskDefinitionId, newCount, deploymentConfig, networkConfig, s.healthCheckGP)
 	if err != nil {
@@ -267,6 +267,9 @@ func (s *Service) Up() error { // update
 	}
 	if deploymentConfig != nil && deploymentConfig.MinimumHealthyPercent != nil {
 		fields["deployment-min-healthy-percent"] = aws.Int64Value(deploymentConfig.MinimumHealthyPercent)
+	}
+	if s.healthCheckGP != nil {
+		fields["health-check-grace-period"] = *s.healthCheckGP
 	}
 
 	log.WithFields(fields).Info("Updated the ECS service with a new task definition. " +
@@ -342,8 +345,6 @@ func (s *Service) createService() error {
 	serviceName := entity.GetServiceName(s)
 	taskDefinitionID := entity.GetIdFromArn(s.TaskDefinition().TaskDefinitionArn)
 	launchType := s.Context().CLIParams.LaunchType
-
-	log.Warn("CREATE service context: %+v", s.Context())
 
 	networkConfig, err := composeutils.ConvertToECSNetworkConfiguration(s.projectContext.ECSParams)
 	if err != nil {
