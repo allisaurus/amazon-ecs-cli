@@ -48,7 +48,7 @@
 
 [[projects]]
   name = "github.com/docker/cli"
-  packages = ["opts"]
+  packages = ["cli/compose/interpolation","cli/compose/loader","cli/compose/schema","cli/compose/template","cli/compose/types","opts"]
   revision = "41368a84bb8b1502450b316b34c732d7bb1a103d"
 
 [[projects]]
@@ -108,9 +108,21 @@
   revision = "0b12d6b5"
 
 [[projects]]
+  name = "github.com/mattn/go-shellwords"
+  packages = ["."]
+  revision = "02e3cf038dcea8290e44424da473dd12be796a8a"
+  version = "v1.0.3"
+
+[[projects]]
   name = "github.com/mitchellh/go-homedir"
   packages = ["."]
   revision = "981ab348d865cf048eb7d17e78ac7192632d8415"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/mitchellh/mapstructure"
+  packages = ["."]
+  revision = "00c29f56e2386353d58c599509e8dc3801b0d716"
 
 [[projects]]
   name = "github.com/opencontainers/go-digest"
@@ -193,6 +205,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "b911e31ad580796071e4d98e7b5d2d0eafb01d15c968aba682e83ca05659e94d"
+  inputs-digest = "254f2a77a04b02e8e04de553e79a85921c88238259ae351b88413efa532187c2"
   solver-name = "gps-cdcl"
   solver-version = 1

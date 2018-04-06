@@ -77,3 +77,7 @@
 [[constraint]]
   name = "gopkg.in/yaml.v2"
   revision = "a5b47d31c556af34a302ce5d659e6fea44d90de0"
+
+[[constraint]]
+  name = "github.com/docker/cli"
+  revision = "41368a84bb8b1502450b316b34c732d7bb1a103d"
