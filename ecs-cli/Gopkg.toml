@@ -80,4 +80,4 @@
 
 [[constraint]]
   name = "github.com/docker/cli"
-  revision = "41368a84bb8b1502450b316b34c732d7bb1a103d"
+  revision = "8e1cd515ba243e29c164d75ca17f3eadb7bbc858"

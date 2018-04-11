@@ -49,7 +49,7 @@
 [[projects]]
   name = "github.com/docker/cli"
   packages = ["cli/compose/interpolation","cli/compose/loader","cli/compose/schema","cli/compose/template","cli/compose/types","opts"]
-  revision = "41368a84bb8b1502450b316b34c732d7bb1a103d"
+  revision = "8e1cd515ba243e29c164d75ca17f3eadb7bbc858"
 
 [[projects]]
   name = "github.com/docker/docker"
@@ -101,6 +101,12 @@
   name = "github.com/hashicorp/go-cleanhttp"
   packages = ["."]
   revision = "ad28ea4487f05916463e2423a55166280e8254b5"
+
+[[projects]]
+  name = "github.com/imdario/mergo"
+  packages = ["."]
+  revision = "9d5f1277e9a8ed20c3684bda8fde67c05628518c"
+  version = "v0.3.4"
 
 [[projects]]
   name = "github.com/jmespath/go-jmespath"
@@ -205,6 +211,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "254f2a77a04b02e8e04de553e79a85921c88238259ae351b88413efa532187c2"
+  inputs-digest = "505c86f0db4e20cfedf12e1b0d98505de7c2cd1d7f245a1beeac2f4b310c8c21"
   solver-name = "gps-cdcl"
   solver-version = 1
