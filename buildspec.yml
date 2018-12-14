@@ -2,7 +2,7 @@ version: 0.2
 phases:
   install:
     commands:
-      - sudo yum install make
+      - sudo apt-get install make
   build:
     commands:
       - make build
