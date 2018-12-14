@@ -3,8 +3,4 @@ phases:
   build:
     commands:
       - pwd
-<<<<<<< HEAD
       - make test
-=======
-      - go test -cover ./ecs-cli/modules/…
->>>>>>> parent of fcd2ac9... add back 'make test'
