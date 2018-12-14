@@ -2,8 +2,7 @@ version: 0.2
 phases:
   install:
     commands:
-      - sudo apt-get install make
+      - make version
   build:
     commands:
-      - make build
       - make test
