@@ -3,5 +3,8 @@ phases:
   build:
     commands:
       - pwd
-      - which docker
-      - make docker-test
+<<<<<<< HEAD
+      - make test
+=======
+      - go test -cover ./ecs-cli/modules/…
+>>>>>>> parent of fcd2ac9... add back 'make test'
