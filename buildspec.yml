@@ -3,4 +3,5 @@ phases:
   build:
     commands:
       - pwd
-      - go test -cover ./ecs-cli/modules/…
+      - which docker
+      - make docker-test
