@@ -678,20 +678,12 @@ var clusterTemplate = `
       }
     },
     "EcsInstanceProfile": {
-      "Condition": "LaunchInstances",
+      "Condition": "CreateEcsInstanceRole",
       "Type": "AWS::IAM::InstanceProfile",
       "Properties": {
         "Path": "/",
         "Roles": [
-          "Fn::If": [
-            "CreateEcsInstanceRole",
-            {
-              "Ref": "EcsInstanceRole"
-            },
-            {
-              "Ref": "InstanceRole"
-            }
-          ]
+          "Ref": "EcsInstanceRole"
         ]
       }
     },
@@ -718,7 +710,15 @@ var clusterTemplate = `
           "Ref": "AssociatePublicIpAddress"
         },
         "IamInstanceProfile": {
-          "Ref": "EcsInstanceProfile"
+          "Fn::If": [
+            "CreateEcsInstanceRole",
+            {
+              "Ref": "EcsInstanceProfile"
+            },
+            {
+              "Ref": "InstanceRole"
+            }
+          ]
         },
         "KeyName": {
           "Fn::If": [
